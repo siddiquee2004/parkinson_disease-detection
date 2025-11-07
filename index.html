@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Parkinson's Disease Detection</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo"><i class="fas fa-brain"></i> Parkinson's Detector</div>
+    <nav>
+      <ul>
+        <li><a href="#" class="active">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#symptoms">Symptoms</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="toggle-switch" id="darkModeToggle" title="Toggle Dark Mode">
+      <i class="fas fa-moon"></i>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>AI-Powered Parkinson's Disease Detection</h1>
+      <button id="startDiagnosisBtn" class="primary">Start Diagnosis</button>
+    </div>
+  </section>
+
+  <!-- Symptoms Section -->
+  <section class="symptom-form-section" id="symptoms">
+    <h2>Enter Your Symptoms & Voice Features</h2>
+    <form id="symptomForm" novalidate>
+
+      <!-- Symptom Description -->
+      <label for="symptomText">Describe your symptoms:</label>
+      <div class="symptom-input-row">
+        <input type="text" id="symptomText" name="symptomText" placeholder="e.g. tremor, stiffness" required />
+        <button type="button" id="voiceBtn" class="icon-btn" title="Use voice input"><i class="fas fa-microphone"></i></button>
+        <span id="voiceStatus" class="voice-status" aria-hidden="true"></span>
+      </div>
+
+      <!-- Severity -->
+      <label for="severity">Select severity:</label>
+      <select id="severity" name="severity" required>
+        <option value="">Choose severity</option>
+        <option value="mild">Mild</option>
+        <option value="moderate">Moderate</option>
+        <option value="severe">Severe</option>
+      </select>
+
+      <!-- Common Symptoms -->
+      <fieldset class="checkbox-group">
+        <legend>Select common symptoms:</legend>
+        <label><input type="checkbox" name="commonSymptoms" value="tremor" /> Tremor</label>
+        <label><input type="checkbox" name="commonSymptoms" value="rigidity" /> Rigidity</label>
+        <label><input type="checkbox" name="commonSymptoms" value="bradykinesia" /> Bradykinesia</label>
+        <label><input type="checkbox" name="commonSymptoms" value="posturalInstability" /> Postural Instability</label>
+        <label><input type="checkbox" name="commonSymptoms" value="speechChanges" /> Changes in Speech</label>
+        <label><input type="checkbox" name="commonSymptoms" value="maskedFace" /> Masked Face</label>
+      </fieldset>
+
+      <!-- Toggle Advanced Features -->
+      <button type="button" class="toggle-numeric-btn">Show Advanced Features</button>
+      <fieldset class="numeric-features" style="display:none;">
+        <legend>Advanced Voice & Motor Features</legend>
+        <div class="numeric-grid">
+          <label>MDVP:Fo <input type="number" step="any" id="mdvp_fo" /></label>
+          <label>MDVP:Fhi <input type="number" step="any" id="mdvp_fhi" /></label>
+          <label>MDVP:Flo <input type="number" step="any" id="mdvp_flo" /></label>
+          <label>MDVP:Jitter(%) <input type="number" step="any" id="mdvp_jitter" /></label>
+          <label>MDVP:Jitter(Abs) <input type="number" step="any" id="mdvp_jitter_abs" /></label>
+          <label>MDVP:RAP <input type="number" step="any" id="mdvp_rap" /></label>
+          <label>MDVP:PPQ <input type="number" step="any" id="mdvp_ppq" /></label>
+          <label>Jitter:DDP <input type="number" step="any" id="jitter_ddp" /></label>
+          <label>MDVP:Shimmer <input type="number" step="any" id="mdvp_shimmer" /></label>
+          <label>MDVP:Shimmer(dB) <input type="number" step="any" id="mdvp_shimmer_db" /></label>
+          <label>Shimmer:APQ3 <input type="number" step="any" id="shimmer_apq3" /></label>
+          <label>Shimmer:APQ5 <input type="number" step="any" id="shimmer_apq5" /></label>
+          <label>MDVP:APQ <input type="number" step="any" id="mdvp_apq" /></label>
+          <label>Shimmer:DDA <input type="number" step="any" id="shimmer_dda" /></label>
+          <label>NHR <input type="number" step="any" id="nhr" /></label>
+          <label>HNR <input type="number" step="any" id="hnr" /></label>
+          <label>RPDE <input type="number" step="any" id="rpde" /></label>
+          <label>DFA <input type="number" step="any" id="dfa" /></label>
+          <label>Spread1 <input type="number" step="any" id="spread1" /></label>
+          <label>Spread2 <input type="number" step="any" id="spread2" /></label>
+          <label>D2 <input type="number" step="any" id="d2" /></label>
+          <label>PPE <input type="number" step="any" id="ppe" /></label>
+        </div>
+      </fieldset>
+
+      <!-- Submit -->
+      <div class="form-actions">
+        <button type="submit" class="detect-btn primary">Detect Parkinson's</button>
+        <button type="button" id="viewDashboardBtn" class="dashboard-btn">View Dashboard</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Result Popup -->
+  <div class="result-popup" id="resultPopup" role="dialog" aria-modal="true" tabindex="-1">
+    <h3 id="resultTitle">Detection Result</h3>
+    <p id="resultDesc"></p>
+    <div class="prob-wrapper">
+      <div id="probabilityBar" class="probability-bar" style="width:0%"></div>
+    </div>
+    <button id="closeResult" class="secondary">Close</button>
+  </div>
+
+  <!-- Dashboard Section -->
+  <section id="dashboardSection" class="dashboard-section" style="display:none;">
+    <div class="dashboard-top">
+      <h2>📊 Parkinson's Detection Dashboard</h2>
+      <div class="dashboard-summary">
+        <div class="card"><h3>Total Tests</h3><p id="totalTests">0</p></div>
+        <div class="card"><h3>Parkinson's Detected</h3><p id="positiveTests">0</p></div>
+        <div class="card"><h3>No Parkinson's</h3><p id="negativeTests">0</p></div>
+      </div>
+      <div class="dashboard-actions">
+        <button id="closeDashboard" class="secondary">Close Dashboard</button>
+        <button id="clearHistory" class="danger">Clear History</button>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-box"><h3>Overall Prediction Results</h3><canvas id="pieChart"></canvas></div>
+      <div class="chart-box"><h3>Severity Distribution</h3><canvas id="barChart"></canvas></div>
+    </div>
+
+    <div class="history-box">
+      <h3>Recent Results</h3>
+      <table id="historyTable">
+        <thead><tr><th>#</th><th>Date</th><th>Result</th><th>Probability (%)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact-section">
+    <h2>Contact Us</h2>
+    <p>Have any questions or feedback? We’d love to hear from you!</p>
+
+    <form id="contactForm">
+      <div class="form-group">
+        <input type="text" id="name" placeholder="Your Name" required />
+      </div>
+      <div class="form-group">
+        <input type="email" id="email" placeholder="Your Email" required />
+      </div>
+      <div class="form-group">
+        <textarea id="message" placeholder="Your Message" required></textarea>
+      </div>
+      <button type="submit" class="primary">Send Message</button>
+    </form>
+
+    <div id="formStatus"></div>
+
+    <div class="contact-info">
+      <p><i class="fa-solid fa-envelope"></i> contact@parkinsonsdetect.com</p>
+      <p><i class="fa-solid fa-phone"></i> +91 8144324247</p>
+      <p><i class="fa-solid fa-location-dot"></i> Bhubaneswar, India</p>
+    </div>
+  </section>
+
+  <!-- Chatbot -->
+  <div id="chatbot" class="chatbot">
+    <button id="chatToggle" class="chat-toggle"><i class="fas fa-comments"></i></button>
+    <div id="chatBox" class="chat-box" style="display:none;">
+      <div class="chat-header">
+        Assistant
+        <button id="closeChat" class="close-chat"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <div class="chat-input">
+        <input id="chatInput" placeholder="Ask about symptoms or app..." />
+        <button id="sendChat" class="primary">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Contact Form Script -->
+  <script>
+    const contactForm = document.getElementById("contactForm");
+    const formStatus = document.getElementById("formStatus");
+
+    contactForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const message = document.getElementById("message").value.trim();
+
+      if (!name || !email || !message) {
+        alert("⚠️ Please fill in all fields before submitting.");
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:5000/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, message }),
+        });
+
+        if (response.ok) {
+          formStatus.innerHTML = "<p style='color:green;'>✅ Message sent successfully!</p>";
+          contactForm.reset();
+        } else {
+          formStatus.innerHTML = "<p style='color:red;'>❌ Failed to send message. Try again later.</p>";
+        }
+      } catch (error) {
+        formStatus.innerHTML = "<p style='color:red;'>⚠️ Server error. Please check your connection.</p>";
+      }
+    });
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>
